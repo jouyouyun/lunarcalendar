@@ -26,12 +26,6 @@ import (
 	"time"
 )
 
-type yearInfo struct {
-	year  int
-	month int
-	day   int
-}
-
 func isYearValid(year int) bool {
 	if year > MaxYear || year < MinYear {
 		fmt.Printf("Invalid Year: %d. Year Range(%d - %d)\n",
@@ -63,7 +57,7 @@ func getLunarLeapYear(year int) (int, bool) {
 /**
  * 获取农历年每月的天数及一年的总天数
  */
-func getLunarYearDays(year int) ([]dateDayInfo, int, bool) {
+func getLunarYearDays(year int) ([]caDayInfo, int, bool) {
 	if !isYearValid(year) {
 		return nil, -1, false
 	}
@@ -89,9 +83,9 @@ func getLunarYearDays(year int) ([]dateDayInfo, int, bool) {
 	}
 
 	yearDays := 0
-	monthDayInfos := []dateDayInfo{}
+	monthDayInfos := []caDayInfo{}
 	for i := 0; i < monthNum; i++ {
-		tmp := dateDayInfo{}
+		tmp := caDayInfo{}
 		if monthData[i] == '0' {
 			yearDays += 29
 			tmp.days = 29
@@ -115,13 +109,13 @@ func getLunarYearDays(year int) ([]dateDayInfo, int, bool) {
 /**
  * 通过间隔天数查找农历日期
  */
-func getLunarDateByBetween(year, between int) (yearInfo, bool) {
+func getLunarDateByBetween(year, between int) (caYearInfo, bool) {
 	month := int(-1)
 	day := int(-1)
 	monthDayInfos, yearDays, ok := getLunarYearDays(year)
 	if !ok {
 		fmt.Println("Get Year Days Failed For Year: ", year)
-		return yearInfo{year, month, day}, false
+		return caYearInfo{year, month, day}, false
 	}
 
 	end := int(0)
@@ -130,7 +124,7 @@ func getLunarDateByBetween(year, between int) (yearInfo, bool) {
 	} else {
 		end = yearDays - between
 	}
-	fmt.Println("Between: ", end)
+	//fmt.Println("Between: ", end)
 	tmpDays := int(0)
 	for _, info := range monthDayInfos {
 		tmpDays += info.days
@@ -143,15 +137,15 @@ func getLunarDateByBetween(year, between int) (yearInfo, bool) {
 	}
 	day = end - tmpDays + 1
 
-	return yearInfo{year, month, day}, true
+	return caYearInfo{year, month, day}, true
 }
 
 /**
  * 通过公历日期获取农历日期
  */
-func getLunarDateBySolar(year, month, day int) (yearInfo, bool) {
+func getLunarDateBySolar(year, month, day int) (caYearInfo, bool) {
 	if !isYearValid(year) {
-		return yearInfo{-1, -1, -1}, false
+		return caYearInfo{-1, -1, -1}, false
 	}
 
 	info := lunarInfos[year-MinYear]
@@ -160,7 +154,7 @@ func getLunarDateBySolar(year, month, day int) (yearInfo, bool) {
 	between, _ := getDaysBetweenSolar(year, zengMonth, zengDay,
 		year, month, day)
 	if between == 0 { //正月初一
-		return yearInfo{year, 1, 1}, true
+		return caYearInfo{year, 1, 1}, true
 	} else if between < 0 {
 		year -= 1
 	}
@@ -227,15 +221,15 @@ func formatDayD4(month, day int) string {
  * n 第几个节气，从0小寒起算
  * 由于农历24节气交节时刻采用近似算法，可能存在少量误差(30分钟内)
  */
-func getTermDate(year, n int) (yearInfo, bool) {
+func getTermDate(year, n int) (caYearInfo, bool) {
 	if !isYearValid(year) {
-		return yearInfo{}, false
+		return caYearInfo{}, false
 	}
 
 	offset := 31556925974/1000*(int64(year)-1890) + int64(termInfo[n])*60 + time.Date(1890, 1, 5, 16, 2, 31, 0, time.UTC).Unix()
 	y, m, d := time.Unix(offset, 0).Date()
 
-	return yearInfo{y, int(m), d}, true
+	return caYearInfo{y, int(m), d}, true
 }
 
 /**
@@ -250,11 +244,7 @@ func getYearTerm(year int) map[string]string {
 			continue
 		} else {
 			// 每个月中有两个节气
-			if i < 2 {
-				month = 1
-			} else {
-				month = i/2 + 1
-			}
+			month = i/2 + 1
 			res[formatDayD4(month, info.day)] = lunarData["solarTerm"][i]
 		}
 	}
@@ -264,6 +254,7 @@ func getYearTerm(year int) map[string]string {
 
 /**
  * 获取生肖
+ * 十二生肖，即：鼠、牛、虎、兔、龙、蛇、马、羊、猴、鸡、狗、猪
  * year: 干支所在年(默认以立春前的公历年作为基数)
  */
 func getYearZodiac(year int) (string, bool) {
@@ -271,7 +262,9 @@ func getYearZodiac(year int) (string, bool) {
 		return "", false
 	}
 
-	num := year - 1890 + 25 //参考干支纪年的计算，生肖对应地支
+	// 1890 属虎
+	num := year - 1890 + 2 + 24 //参考干支纪年的计算，生肖对应地支
+	//fmt.Println("zodiac num: ", num)
 	return lunarData["zodiac"][num%12], true
 }
 
@@ -294,7 +287,7 @@ func getLunarYearName(year, offset int) (string, bool) {
 	}
 
 	offset = offset | 0
-	return cyclical(year - 1890 + 25 + offset)
+	return cyclical(year - 1890 + 26 + offset)
 }
 
 /**
@@ -338,12 +331,12 @@ func getSolarMonthDays(year, month int) (int, bool) {
 
 	monthDays := []int{}
 	if isLeapYear(year) {
-		monthDays = []int{31, 29, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+		monthDays = []int{31, 29, 30, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	} else {
-		monthDays = []int{31, 28, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+		monthDays = []int{31, 28, 30, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	}
 
-	return monthDays[month], true
+	return monthDays[month-1], true
 }
 
 func isLeapYear(year int) bool {
@@ -360,30 +353,30 @@ func formatDate(year, month, day int) {
  * 将农历转换为公历
  * year,month,day 农历年，月(1-13，有闰月)，日
  */
-func lunarToSolar(year, month, day int) (yearInfo, bool) {
+func lunarToSolar(year, month, day int) (caYearInfo, bool) {
 	if !isYearValid(year) {
-		return yearInfo{-1, -1, -1}, false
+		return caYearInfo{-1, -1, -1}, false
 	}
 
 	between, _ := getDaysBetweenZheng(year, month, day)
-	//info := lunarInfos[year-MinYear]
-	//zengMonth := info.zhengMonth
-	//zengDay := info.zhengDay
+	info := lunarInfos[year-MinYear]
+	zengMonth := info.zhengMonth
+	zengDay := info.zhengDay
 
-	offDate := time.Date(int(year), time.Month(month), int(day),
+	offDate := time.Date(year, time.Month(zengMonth), zengDay,
 		0, 0, 0, 0, time.UTC).Unix() + int64(between)*86400
 	newDate := time.Unix(offDate, 0)
 	y, m, d := newDate.Date()
 
-	return yearInfo{int(y), int(m), int(d)}, true
+	return caYearInfo{int(y), int(m), int(d)}, true
 }
 
 /**
  * 将公历转换为农历
  */
-func solarToLunar(year, month, day int) (map[string]interface{}, bool) {
+func solarToLunar(year, month, day int) (caLunarDayInfo, bool) {
 	if !isYearValid(year) {
-		return nil, false
+		return caLunarDayInfo{}, false
 	}
 
 	cacheObj.setCurrent(year)
@@ -393,7 +386,7 @@ func solarToLunar(year, month, day int) (map[string]interface{}, bool) {
 		info, _ := getTermDate(year, 2)
 		v = cacheObj.setCache("term2", info)
 	}
-	term2 := v.(yearInfo)
+	term2 := v.(caYearInfo)
 
 	// 二十四节气
 	v, ok = cacheObj.getCache("termList")
@@ -408,16 +401,16 @@ func solarToLunar(year, month, day int) (map[string]interface{}, bool) {
 	//干支所在年份
 	ganZhiYear := int(0)
 	if month > 1 || (month == 1 && day >= term2.day) {
-		ganZhiYear = year + 1
-	} else {
 		ganZhiYear = year
+	} else {
+		ganZhiYear = year - 1
 	}
 	//干支所在月份（以节气为界）
 	ganZhiMonth := int(0)
 	if day >= firstTerm.day {
-		ganZhiMonth = month + 1
-	} else {
 		ganZhiMonth = month
+	} else {
+		ganZhiMonth = month - 1
 	}
 
 	lunarDate, _ := getLunarDateBySolar(year, month, day)
@@ -445,24 +438,25 @@ func solarToLunar(year, month, day int) (map[string]interface{}, bool) {
 	}
 
 	// 返回结果
-	resMap := make(map[string]interface{})
+	resInfo := caLunarDayInfo{}
+	//fmt.Println("GanZhiYear: ", ganZhiYear)
 	zodiac, _ := getYearZodiac(ganZhiYear)
-	resMap["zodiac"] = zodiac
+	resInfo.zodiac = zodiac
 	yearName, _ := getLunarYearName(ganZhiYear, 0)
-	resMap["GanZhiYear"] = yearName
+	resInfo.ganZhiYear = yearName
 	monthName, _ := getLunarMonthName(year, ganZhiMonth, 0)
-	resMap["GanZhiMonth"] = monthName
+	resInfo.ganZhiMonth = monthName
 	dayName, _ := getLunarDayName(year, month, day)
-	resMap["GanZhiDay"] = dayName
-	resMap["term"] = termList[formatDayD4(month, day)]
-	resMap["lunarYear"] = lunarDate.year
-	resMap["lunarMonth"] = lunarDate.month
-	resMap["lunarDay"] = lunarDate.day
-	resMap["lunarMonthName"] = lunarMonthName
-	resMap["lunarDayName"] = lunarData["dateCn"][lunarDate.day-1]
-	resMap["lunarLeapMonth"] = lunarLeapMonth
-	resMap["solarFestival"] = solarFestival[formatDayD4(month, day)]
-	resMap["lunarFestival"] = lunarFtv
+	resInfo.ganZhiDay = dayName
+	resInfo.term = termList[formatDayD4(month, day)]
+	resInfo.lunarYear = lunarDate.year
+	resInfo.lunarMonth = lunarDate.month
+	resInfo.lunarDay = lunarDate.day
+	resInfo.lunarMonthName = lunarMonthName
+	resInfo.lunarDayName = lunarData["dateCn"][lunarDate.day-1]
+	resInfo.lunarLeapMonth = lunarLeapMonth
+	resInfo.solarFestival = solarFestival[formatDayD4(month, day)]
+	resInfo.lunarFestival = lunarFtv
 
-	return resMap, true
+	return resInfo, true
 }

@@ -28,9 +28,31 @@ type lunarYearInfo struct {
 	lunarMonthNum int //农历每月的天数的数组(需转换为二进制,得到每月大小，0=小月(29日),1=大月(30日))
 }
 
-type dateDayInfo struct {
+type caDayInfo struct {
 	index int
 	days  int
+}
+
+type caYearInfo struct {
+	year  int
+	month int
+	day   int
+}
+
+type caLunarDayInfo struct {
+	lunarYear      int
+	lunarMonth     int
+	lunarDay       int
+	lunarLeapMonth int
+	lunarMonthName string
+	lunarDayName   string
+	ganZhiYear     string
+	ganZhiMonth    string
+	ganZhiDay      string
+	zodiac         string
+	term           string
+	solarFestival  string
+	lunarFestival  string
 }
 
 type cacheUtil struct {
