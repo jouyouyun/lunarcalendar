@@ -21,25 +21,26 @@
 
 package main
 
-import (
-	"fmt"
-)
-
 type lunarYearInfo struct {
-	leapMonth          int32 //闰月所在月，0为没有闰月
-	springKalendsMonth int32 //正月初一对应公历月
-	springKalendsDay   int32 //正月初一对应公历日
-	lunarMonthNum      int32 //农历每月的天数的数组(需转换为二进制,得到每月大小，0=小月(29日),1=大月(30日))
+	leapMonth     int //闰月所在月，0为没有闰月
+	zhengMonth    int //正月初一对应公历月
+	zhengDay      int //正月初一对应公历日
+	lunarMonthNum int //农历每月的天数的数组(需转换为二进制,得到每月大小，0=小月(29日),1=大月(30日))
+}
+
+type dateDayInfo struct {
+	index int
+	days  int
 }
 
 type cacheUtil struct {
-	current string
+	current int
 }
 
 var (
 	MinYear  = 1890 //最小年限
 	MaxYear  = 2100 //最大年限
-	cacheMap = make(map[string]string)
+	cacheMap = make(map[string]interface{})
 	cacheObj = newCache()
 
 	lunarData = map[string][]string{
@@ -387,11 +388,11 @@ var (
 	 * 二十四节气数据，节气点时间（单位是分钟）
 	 * 从0小寒起算
 	 */
-	termInfo = []uint32{0, 21208, 42467, 63836, 85337, 107014, 128867, 150921, 173149, 195551, 218072, 240693, 263343, 285989, 308563, 331033, 353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758}
+	termInfo = []int{0, 21208, 42467, 63836, 85337, 107014, 128867, 150921, 173149, 195551, 218072, 240693, 263343, 285989, 308563, 331033, 353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758}
 
 	//中国节日放假安排，外部设置，0无特殊安排，1工作，2放假
-	worktime = map[string]map[string]int32{
-		"y2013": map[string]int32{
+	worktime = map[string]map[string]int{
+		"y2013": map[string]int{
 			"d0101": 2,
 			"d0102": 2,
 			"d0103": 2,
@@ -434,7 +435,7 @@ var (
 			"d1007": 2,
 			"d1012": 1,
 		},
-		"y2014": map[string]int32{
+		"y2014": map[string]int{
 			"d0101": 2,
 			"d0126": 1,
 			"d0131": 2,

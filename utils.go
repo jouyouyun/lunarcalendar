@@ -21,41 +21,39 @@
 
 package main
 
-import (
-	"fmt"
-)
-
-func (op *cacheUtil) setCurrent(year int32) {
+func (op *cacheUtil) setCurrent(year int) {
 	if op.current != year {
 		op.current = year
 		op.clearCache()
 	}
 }
 
-func (op *cacheUtil) setCache(key, value string) {
+func (op *cacheUtil) setCache(key string, value interface{}) interface{} {
 	if cacheMap == nil {
-		op.clearCache()
+		cacheMap = make(map[string]interface{})
 	}
 	cacheMap[key] = value
+	return value
 }
 
-func (op *cacheUtil) getCache(key string) (string, bool) {
+func (op *cacheUtil) getCache(key string) (interface{}, bool) {
 	if cacheMap == nil {
-		op.clearCache()
+		cacheMap = make(map[string]interface{})
 	}
 
-	return cacheMap[key]
+	v, ok := cacheMap[key]
+	return v, ok
 }
 
 func (op *cacheUtil) clearCache() {
-	for K, _ := range cacheMap {
+	for key, _ := range cacheMap {
 		delete(cacheMap, key)
 	}
 }
 
 func newCache() *cacheUtil {
 	m := &cacheUtil{}
-	m.current = ""
+	m.current = 0
 
 	return m
 }
