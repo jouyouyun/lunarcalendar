@@ -26,7 +26,7 @@ import (
 )
 
 func test() {
-	n, _ := getLunarLeapYear(2014)
+	n, _ := getLunarLeapYear(1890)
 	fmt.Printf("2014 闰月： %d\n", n)
 	//monthDays, yearDays, _ := getLunarYearDays(2014)
 	//fmt.Printf("2014 days: %d\n", yearDays)
@@ -90,7 +90,27 @@ func test() {
 	//ret.year, ret.month, ret.day)
 
 	fmt.Println("\n将公历转换为农历")
-	ret, _ := solarToLunar(2014, 4, 5)
+	ret, _ := solarToLunar(1890, 3, 25)
+	printLunarDayInfo(ret)
+
+	//fmt.Println("\n公历某月日历")
+	//ret, _ := getSolarCalendar(2014, 9, true)
+	//fmt.Printf("\tFirst Day Week: %d\n", ret.firstDayWeek)
+	//fmt.Printf("\tDays: %d\n\n", ret.days)
+	//for _, v := range ret.datas {
+	//fmt.Printf("\tDate; %v - %v - %v\n", v.year, v.month, v.day)
+	//}
+
+	//fmt.Println("\n获取指定公历月份的农历数据")
+	//info, _ := getLunarCalendar(2014, 9, true)
+	//fmt.Printf("\tFirst Day Week: %d\n", info.firstDayWeek)
+	//fmt.Printf("\tDays: %d\n\n", info.days)
+	//for _, v := range info.datas {
+	//printLunarDayInfo(v)
+	//}
+}
+
+func printLunarDayInfo(ret caLunarDayInfo) {
 	fmt.Printf("\tlunarYear: %v\n", ret.lunarYear)
 	fmt.Printf("\tlunarMonth: %v\n", ret.lunarMonth)
 	fmt.Printf("\tlunarDay: %v\n", ret.lunarDay)
@@ -104,6 +124,7 @@ func test() {
 	fmt.Printf("\tterm: %v\n", ret.term)
 	fmt.Printf("\tsolarFestival: %v\n", ret.solarFestival)
 	fmt.Printf("\tlunarFestival: %v\n", ret.lunarFestival)
+	fmt.Printf("\tworktime: %v\n\n", ret.worktime)
 }
 
 func main() {

@@ -53,6 +53,19 @@ type caLunarDayInfo struct {
 	term           string
 	solarFestival  string
 	lunarFestival  string
+	worktime       int
+}
+
+type caSolarMonthInfo struct {
+	firstDayWeek int
+	days         int
+	datas        []caYearInfo
+}
+
+type caLunarMonthInfo struct {
+	firstDayWeek int
+	days         int
+	datas        []caLunarDayInfo
 }
 
 type cacheUtil struct {
@@ -413,7 +426,7 @@ var (
 	termInfo = []int{0, 21208, 42467, 63836, 85337, 107014, 128867, 150921, 173149, 195551, 218072, 240693, 263343, 285989, 308563, 331033, 353350, 375494, 397447, 419210, 440795, 462224, 483532, 504758}
 
 	//中国节日放假安排，外部设置，0无特殊安排，1工作，2放假
-	worktime = map[string]map[string]int{
+	worktimeYearMap = map[string]map[string]int{
 		"y2013": map[string]int{
 			"d0101": 2,
 			"d0102": 2,

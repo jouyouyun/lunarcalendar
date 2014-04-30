@@ -94,12 +94,13 @@ func getLunarYearDays(year int) ([]caDayInfo, int, bool) {
 			tmp.days = 30
 		}
 		// 让月份从1开始，不从0开始
-		t := i + 1
+		//t := i + 1
 		// 处理闰月
-		if i >= leapMonth {
-			t -= 1
-		}
-		tmp.index = t
+		//if i >= leapMonth {
+		//t -= 1
+		//}
+		//tmp.index = t
+		tmp.index = i + 1
 		monthDayInfos = append(monthDayInfos, tmp)
 	}
 
@@ -117,6 +118,8 @@ func getLunarDateByBetween(year, between int) (caYearInfo, bool) {
 		fmt.Println("Get Year Days Failed For Year: ", year)
 		return caYearInfo{year, month, day}, false
 	}
+
+	//leapMonth, _ := getLunarLeapYear(year)
 
 	end := int(0)
 	if between > 0 {
@@ -331,9 +334,9 @@ func getSolarMonthDays(year, month int) (int, bool) {
 
 	monthDays := []int{}
 	if isLeapYear(year) {
-		monthDays = []int{31, 29, 30, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+		monthDays = []int{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	} else {
-		monthDays = []int{31, 28, 30, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+		monthDays = []int{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 	}
 
 	return monthDays[month-1], true
@@ -416,9 +419,9 @@ func solarToLunar(year, month, day int) (caLunarDayInfo, bool) {
 	lunarDate, _ := getLunarDateBySolar(year, month, day)
 	lunarLeapMonth, _ := getLunarLeapYear(lunarDate.year)
 	lunarMonthName := ""
-	if lunarLeapMonth > 0 && lunarLeapMonth == lunarDate.month {
-		lunarMonthName = "闰" + lunarData["monthCn"][lunarDate.month-1] + "月"
-	} else if lunarLeapMonth > 0 && lunarLeapMonth > lunarDate.month {
+	if lunarLeapMonth > 0 && lunarLeapMonth+1 == lunarDate.month {
+		lunarMonthName = "闰" + lunarData["monthCn"][lunarDate.month-2] + "月"
+	} else if lunarLeapMonth > 0 && lunarLeapMonth >= lunarDate.month {
 		lunarMonthName = lunarData["monthCn"][lunarDate.month-1] + "月"
 	} else {
 		lunarMonthName = lunarData["monthCn"][lunarDate.month] + "月"
@@ -457,6 +460,116 @@ func solarToLunar(year, month, day int) (caLunarDayInfo, bool) {
 	resInfo.lunarLeapMonth = lunarLeapMonth
 	resInfo.solarFestival = solarFestival[formatDayD4(month, day)]
 	resInfo.lunarFestival = lunarFtv
+	resInfo.worktime = 0
+	//fmt.Printf("*** Date: %v - %v - %v\n", year, month, day)
+	if m, ok := worktimeYearMap[fmt.Sprintf("y%d", year)]; ok {
+		//fmt.Printf("--- get %d worktime\n", year)
+		if v, ok := m[formatDayD4(month, day)]; ok {
+			//fmt.Printf("--- get %d - %d worktime\n", month, day)
+			resInfo.worktime = v
+		}
+	}
 
 	return resInfo, true
+}
+
+/**
+ * 获取指定公历月份的农历数据
+ * year,month 公历年，月
+ * fill 是否用上下月数据补齐首尾空缺，首例数据从周日开始
+ */
+func getLunarCalendar(year, month int, fill bool) (caLunarMonthInfo, bool) {
+	if !isYearValid(year) {
+		return caLunarMonthInfo{}, false
+	}
+
+	solarData, _ := getSolarCalendar(year, month, fill)
+	l := len(solarData.datas)
+	datas := []caLunarDayInfo{}
+	for i := 0; i < l; i++ {
+		data1 := solarData.datas[i]
+		tmp, _ := solarToLunar(data1.year, data1.month, data1.day)
+		datas = append(datas, tmp)
+	}
+
+	return caLunarMonthInfo{solarData.firstDayWeek, solarData.days, datas}, true
+}
+
+/**
+ * 公历某月日历
+ * year,month 公历年，月
+ * fill 是否用上下月数据补齐首尾空缺，首例数据从周日开始(7*6阵列)
+ */
+func getSolarCalendar(year, month int, fill bool) (caSolarMonthInfo, bool) {
+	if !isYearValid(year) {
+		return caSolarMonthInfo{}, false
+	}
+
+	date := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	week := int(date.Weekday())
+	days, _ := getSolarMonthDays(year, month)
+	monthData := getMonthDatas(year, month, days, 1)
+
+	if fill {
+		if week > 0 { //前补
+			// 获取前一个月的日期
+			preYear := 0
+			preMonth := 0
+			if month-1 <= 0 {
+				preYear = year - 1
+				preMonth = 12
+			} else {
+				preMonth = month - 1
+				preYear = year
+			}
+
+			preDays, _ := getSolarMonthDays(preYear, preMonth)
+			fmt.Printf("****Pre Date: %v - %v\n", preYear, preMonth)
+			fmt.Println("****Pre Month Days: ", preDays)
+			preMonthData := getMonthDatas(preYear, preMonth,
+				week, preDays-week+1)
+			preMonthData = append(preMonthData, monthData...)
+			monthData = preMonthData
+		}
+
+		if 7*6-len(monthData) != 0 { // 后补
+			// 获取前一个月的日期
+			nextYear := 0
+			nextMonth := 0
+			if month+1 > 12 {
+				nextYear = year + 1
+				nextMonth = 1
+			} else {
+				nextMonth = month + 1
+				nextYear = year
+			}
+
+			fillLen := 7*6 - len(monthData)
+			fmt.Printf("----Next Date: %v - %v\n",
+				nextYear, nextMonth)
+			fmt.Println("----Next Month Days: ", fillLen)
+			nextMonthData := getMonthDatas(nextYear, nextMonth,
+				fillLen, 1)
+			monthData = append(monthData, nextMonthData...)
+		}
+	}
+
+	return caSolarMonthInfo{week, days, monthData}, true
+}
+
+func getMonthDatas(year, month, length, start int) []caYearInfo {
+	monthDatas := []caYearInfo{}
+
+	if length < 1 {
+		return monthDatas
+	}
+
+	k := start | 0
+	for i := 0; i < length; i++ {
+		tmp := caYearInfo{year, month, k}
+		monthDatas = append(monthDatas, tmp)
+		k++
+	}
+
+	return monthDatas
 }
