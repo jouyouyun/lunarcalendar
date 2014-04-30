@@ -248,7 +248,7 @@ func getYearTerm(year int) map[string]string {
 		} else {
 			// 每个月中有两个节气
 			month = i/2 + 1
-			res[formatDayD4(month, info.day)] = lunarData["solarTerm"][i]
+			res[formatDayD4(month, info.Day)] = lunarData["solarTerm"][i]
 		}
 	}
 
@@ -371,7 +371,7 @@ func lunarToSolar(year, month, day int) (caYearInfo, bool) {
 	newDate := time.Unix(offDate, 0)
 	y, m, d := newDate.Date()
 
-	return caYearInfo{int(y), int(m), int(d)}, true
+	return caYearInfo{y, int(m), d}, true
 }
 
 /**
@@ -403,70 +403,70 @@ func solarToLunar(year, month, day int) (caLunarDayInfo, bool) {
 	firstTerm, _ := getTermDate(year, month*2)
 	//干支所在年份
 	ganZhiYear := int(0)
-	if month > 1 || (month == 1 && day >= term2.day) {
+	if month > 1 || (month == 1 && day >= term2.Day) {
 		ganZhiYear = year
 	} else {
 		ganZhiYear = year - 1
 	}
 	//干支所在月份（以节气为界）
 	ganZhiMonth := int(0)
-	if day >= firstTerm.day {
+	if day >= firstTerm.Day {
 		ganZhiMonth = month
 	} else {
 		ganZhiMonth = month - 1
 	}
 
 	lunarDate, _ := getLunarDateBySolar(year, month, day)
-	lunarLeapMonth, _ := getLunarLeapYear(lunarDate.year)
+	lunarLeapMonth, _ := getLunarLeapYear(lunarDate.Year)
 	lunarMonthName := ""
-	if lunarLeapMonth > 0 && lunarLeapMonth+1 == lunarDate.month {
-		lunarMonthName = "闰" + lunarData["monthCn"][lunarDate.month-2] + "月"
-	} else if lunarLeapMonth > 0 && lunarLeapMonth >= lunarDate.month {
-		lunarMonthName = lunarData["monthCn"][lunarDate.month-1] + "月"
+	if lunarLeapMonth > 0 && lunarLeapMonth+1 == lunarDate.Month {
+		lunarMonthName = "闰" + lunarData["monthCn"][lunarDate.Month-2] + "月"
+	} else if lunarLeapMonth > 0 && lunarLeapMonth >= lunarDate.Month {
+		lunarMonthName = lunarData["monthCn"][lunarDate.Month-1] + "月"
 	} else {
-		lunarMonthName = lunarData["monthCn"][lunarDate.month] + "月"
+		lunarMonthName = lunarData["monthCn"][lunarDate.Month] + "月"
 	}
 
 	//农历节日判断
 	lunarFtv := ""
-	lunarMonthInfos, _, _ := getLunarYearDays(lunarDate.year)
+	lunarMonthInfos, _, _ := getLunarYearDays(lunarDate.Year)
 	lunarMonthLen := int(len(lunarMonthInfos))
 	//除夕
-	if lunarDate.month == (lunarMonthLen-1) && lunarDate.day == lunarMonthInfos[lunarMonthLen-1].days {
+	if lunarDate.Month == (lunarMonthLen-1) && lunarDate.Day == lunarMonthInfos[lunarMonthLen-1].days {
 		lunarFtv = lunarFestival["d0100"]
-	} else if lunarLeapMonth > 0 && lunarDate.month > lunarLeapMonth {
-		lunarFtv = lunarFestival[formatDayD4(lunarDate.month-1, lunarDate.day)]
+	} else if lunarLeapMonth > 0 && lunarDate.Month > lunarLeapMonth {
+		lunarFtv = lunarFestival[formatDayD4(lunarDate.Month-1, lunarDate.Day)]
 	} else {
-		lunarFtv = lunarFestival[formatDayD4(lunarDate.month, lunarDate.day)]
+		lunarFtv = lunarFestival[formatDayD4(lunarDate.Month, lunarDate.Day)]
 	}
 
 	// 返回结果
 	resInfo := caLunarDayInfo{}
 	//fmt.Println("GanZhiYear: ", ganZhiYear)
 	zodiac, _ := getYearZodiac(ganZhiYear)
-	resInfo.zodiac = zodiac
+	resInfo.Zodiac = zodiac
 	yearName, _ := getLunarYearName(ganZhiYear, 0)
-	resInfo.ganZhiYear = yearName
+	resInfo.GanZhiYear = yearName
 	monthName, _ := getLunarMonthName(year, ganZhiMonth, 0)
-	resInfo.ganZhiMonth = monthName
+	resInfo.GanZhiMonth = monthName
 	dayName, _ := getLunarDayName(year, month, day)
-	resInfo.ganZhiDay = dayName
-	resInfo.term = termList[formatDayD4(month, day)]
-	resInfo.lunarYear = lunarDate.year
-	resInfo.lunarMonth = lunarDate.month
-	resInfo.lunarDay = lunarDate.day
-	resInfo.lunarMonthName = lunarMonthName
-	resInfo.lunarDayName = lunarData["dateCn"][lunarDate.day-1]
-	resInfo.lunarLeapMonth = lunarLeapMonth
-	resInfo.solarFestival = solarFestival[formatDayD4(month, day)]
-	resInfo.lunarFestival = lunarFtv
-	resInfo.worktime = 0
+	resInfo.GanZhiDay = dayName
+	resInfo.Term = termList[formatDayD4(month, day)]
+	resInfo.LunarYear = lunarDate.Year
+	resInfo.LunarMonth = lunarDate.Month
+	resInfo.LunarDay = lunarDate.Day
+	resInfo.LunarMonthName = lunarMonthName
+	resInfo.LunarDayName = lunarData["dateCn"][lunarDate.Day-1]
+	resInfo.LunarLeapMonth = lunarLeapMonth
+	resInfo.SolarFestival = solarFestival[formatDayD4(month, day)]
+	resInfo.LunarFestival = lunarFtv
+	resInfo.Worktime = 0
 	//fmt.Printf("*** Date: %v - %v - %v\n", year, month, day)
 	if m, ok := worktimeYearMap[fmt.Sprintf("y%d", year)]; ok {
 		//fmt.Printf("--- get %d worktime\n", year)
 		if v, ok := m[formatDayD4(month, day)]; ok {
 			//fmt.Printf("--- get %d - %d worktime\n", month, day)
-			resInfo.worktime = v
+			resInfo.Worktime = v
 		}
 	}
 
@@ -484,15 +484,15 @@ func getLunarCalendar(year, month int, fill bool) (caLunarMonthInfo, bool) {
 	}
 
 	solarData, _ := getSolarCalendar(year, month, fill)
-	l := len(solarData.datas)
+	l := len(solarData.Datas)
 	datas := []caLunarDayInfo{}
 	for i := 0; i < l; i++ {
-		data1 := solarData.datas[i]
-		tmp, _ := solarToLunar(data1.year, data1.month, data1.day)
+		data1 := solarData.Datas[i]
+		tmp, _ := solarToLunar(data1.Year, data1.Month, data1.Day)
 		datas = append(datas, tmp)
 	}
 
-	return caLunarMonthInfo{solarData.firstDayWeek, solarData.days, datas}, true
+	return caLunarMonthInfo{solarData.FirstDayWeek, solarData.Days, datas}, true
 }
 
 /**

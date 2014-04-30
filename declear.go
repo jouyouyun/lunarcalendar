@@ -34,38 +34,38 @@ type caDayInfo struct {
 }
 
 type caYearInfo struct {
-	year  int
-	month int
-	day   int
+	Year  int
+	Month int
+	Day   int
 }
 
 type caLunarDayInfo struct {
-	lunarYear      int
-	lunarMonth     int
-	lunarDay       int
-	lunarLeapMonth int
-	lunarMonthName string
-	lunarDayName   string
-	ganZhiYear     string
-	ganZhiMonth    string
-	ganZhiDay      string
-	zodiac         string
-	term           string
-	solarFestival  string
-	lunarFestival  string
-	worktime       int
+	LunarYear      int
+	LunarMonth     int
+	LunarDay       int
+	LunarLeapMonth int
+	LunarMonthName string
+	LunarDayName   string
+	GanZhiYear     string
+	GanZhiMonth    string
+	GanZhiDay      string
+	Zodiac         string
+	Term           string
+	SolarFestival  string
+	LunarFestival  string
+	Worktime       int
 }
 
 type caSolarMonthInfo struct {
-	firstDayWeek int
-	days         int
-	datas        []caYearInfo
+	FirstDayWeek int
+	Days         int
+	Datas        []caYearInfo
 }
 
 type caLunarMonthInfo struct {
-	firstDayWeek int
-	days         int
-	datas        []caLunarDayInfo
+	FirstDayWeek int
+	Days         int
+	Datas        []caLunarDayInfo
 }
 
 type cacheUtil struct {

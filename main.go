@@ -28,7 +28,7 @@ import (
 func test() {
 	n, _ := getLunarLeapYear(1890)
 	fmt.Printf("2014 闰月： %d\n", n)
-	//monthDays, yearDays, _ := getLunarYearDays(2014)
+	/*monthDays, yearDays, _ := getLunarYearDays(2014)*/
 	//fmt.Printf("2014 days: %d\n", yearDays)
 	//for _, info := range monthDays {
 	//fmt.Printf("\t%d 月: %d\n", info.index, info.days)
@@ -37,12 +37,12 @@ func test() {
 	//fmt.Println("\n通过间隔天数查找农历日期")
 	//info, _ := getLunarDateByBetween(2014, 100)
 	//fmt.Println("year: 2014, between: 100")
-	//fmt.Printf("\t%d - %d - %d\n", info.year, info.month, info.day)
+	//fmt.Printf("\t%d - %d - %d\n", info.Year, info.Month, info.Day)
 
 	//fmt.Println("\n通过公历日期获取农历日期")
 	//fmt.Println("Date: 2014 - 4 - 29")
 	//info, _ = getLunarDateBySolar(2014, 4, 29)
-	//fmt.Printf("\t%d - %d - %d\n", info.year, info.month, info.day)
+	//fmt.Printf("\t%d - %d - %d\n", info.Year, info.Month, info.Day)
 
 	//fmt.Println("\n计算两个公历日期之间的天数")
 	//num, _ := getDaysBetweenSolar(2014, 2, 1, 2014, 10, 1)
@@ -57,7 +57,7 @@ func test() {
 	//for i := 0; i < 24; i++ {
 	//info, _ = getTermDate(2014, i)
 	//fmt.Printf("\t%s: %v - %v - %v\n",
-	//lunarData["solarTerm"][i], info.year, info.month, info.day)
+	//lunarData["solarTerm"][i], info.Year, info.Month, info.Day)
 	//}
 
 	//fmt.Println("\n获取公历年一年的二十四节气")
@@ -87,44 +87,44 @@ func test() {
 	//fmt.Println("\n将农历转换为公历")
 	//ret, _ := lunarToSolar(2014, 3, 22)
 	//fmt.Printf("\t2014 - 3 - 22 date: %v - %v - %v\n",
-	//ret.year, ret.month, ret.day)
+	//ret.Year, ret.Month, ret.Day)
 
-	fmt.Println("\n将公历转换为农历")
-	ret, _ := solarToLunar(1890, 3, 25)
-	printLunarDayInfo(ret)
+	//fmt.Println("\n将公历转换为农历")
+	//ret, _ := solarToLunar(1890, 3, 25)
+	//printLunarDayInfo(ret)
 
-	//fmt.Println("\n公历某月日历")
-	//ret, _ := getSolarCalendar(2014, 9, true)
-	//fmt.Printf("\tFirst Day Week: %d\n", ret.firstDayWeek)
-	//fmt.Printf("\tDays: %d\n\n", ret.days)
-	//for _, v := range ret.datas {
-	//fmt.Printf("\tDate; %v - %v - %v\n", v.year, v.month, v.day)
-	//}
+	fmt.Println("\n公历某月日历")
+	ret, _ := getSolarCalendar(2014, 10, true)
+	fmt.Printf("\tFirst Day Week: %d\n", ret.FirstDayWeek)
+	fmt.Printf("\tDays: %d\n\n", ret.Days)
+	for _, v := range ret.Datas {
+		fmt.Printf("\tDate; %v - %v - %v\n", v.Year, v.Month, v.Day)
+	}
 
-	//fmt.Println("\n获取指定公历月份的农历数据")
-	//info, _ := getLunarCalendar(2014, 9, true)
-	//fmt.Printf("\tFirst Day Week: %d\n", info.firstDayWeek)
-	//fmt.Printf("\tDays: %d\n\n", info.days)
-	//for _, v := range info.datas {
-	//printLunarDayInfo(v)
-	//}
+	fmt.Println("\n获取指定公历月份的农历数据")
+	info, _ := getLunarCalendar(2014, 10, true)
+	fmt.Printf("\tFirst Day Week: %d\n", info.FirstDayWeek)
+	fmt.Printf("\tDays: %d\n\n", info.Days)
+	for _, v := range info.Datas {
+		printLunarDayInfo(v)
+	}
 }
 
 func printLunarDayInfo(ret caLunarDayInfo) {
-	fmt.Printf("\tlunarYear: %v\n", ret.lunarYear)
-	fmt.Printf("\tlunarMonth: %v\n", ret.lunarMonth)
-	fmt.Printf("\tlunarDay: %v\n", ret.lunarDay)
-	fmt.Printf("\tlunarLeapMonth: %v\n", ret.lunarLeapMonth)
-	fmt.Printf("\tlunarMonthName: %v\n", ret.lunarMonthName)
-	fmt.Printf("\tlunarDayName: %v\n", ret.lunarDayName)
-	fmt.Printf("\tganZhiYear: %v\n", ret.ganZhiYear)
-	fmt.Printf("\tganZhiMonth: %v\n", ret.ganZhiMonth)
-	fmt.Printf("\tganZhiDay: %v\n", ret.ganZhiDay)
-	fmt.Printf("\tzodiac: %v\n", ret.zodiac)
-	fmt.Printf("\tterm: %v\n", ret.term)
-	fmt.Printf("\tsolarFestival: %v\n", ret.solarFestival)
-	fmt.Printf("\tlunarFestival: %v\n", ret.lunarFestival)
-	fmt.Printf("\tworktime: %v\n\n", ret.worktime)
+	fmt.Printf("\tlunarYear: %v\n", ret.LunarYear)
+	fmt.Printf("\tlunarMonth: %v\n", ret.LunarMonth)
+	fmt.Printf("\tlunarDay: %v\n", ret.LunarDay)
+	fmt.Printf("\tlunarLeapMonth: %v\n", ret.LunarLeapMonth)
+	fmt.Printf("\tlunarMonthName: %v\n", ret.LunarMonthName)
+	fmt.Printf("\tlunarDayName: %v\n", ret.LunarDayName)
+	fmt.Printf("\tganZhiYear: %v\n", ret.GanZhiYear)
+	fmt.Printf("\tganZhiMonth: %v\n", ret.GanZhiMonth)
+	fmt.Printf("\tganZhiDay: %v\n", ret.GanZhiDay)
+	fmt.Printf("\tzodiac: %v\n", ret.Zodiac)
+	fmt.Printf("\tterm: %v\n", ret.Term)
+	fmt.Printf("\tsolarFestival: %v\n", ret.SolarFestival)
+	fmt.Printf("\tlunarFestival: %v\n", ret.LunarFestival)
+	fmt.Printf("\tworktime: %v\n\n", ret.Worktime)
 }
 
 func main() {
