@@ -19,9 +19,9 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  **/
 
-package main
+package lunarcalendar
 
-func (op *cacheUtil) setCurrent(year int) {
+func (op *cacheUtil) setCurrent(year int32) {
 	if op.current != year {
 		op.current = year
 		op.clearCache()
