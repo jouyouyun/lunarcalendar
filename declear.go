@@ -40,9 +40,6 @@ type CaYearInfo struct {
 }
 
 type caLunarDayInfo struct {
-	LunarYear      int32
-	LunarMonth     int32
-	LunarDay       int32
 	LunarLeapMonth int32
 	LunarMonthName string
 	LunarDayName   string

@@ -100,7 +100,7 @@ func getLunarYearDays(year int32) ([]caDayInfo, int32, bool) {
 		//t -= 1
 		//}
 		//tmp.index = t
-		tmp.index = int32(i) + 1
+		tmp.index = int32(i)
 		monthDayInfos = append(monthDayInfos, tmp)
 	}
 
@@ -125,7 +125,7 @@ func getLunarDateByBetween(year, between int32) (CaYearInfo, bool) {
 	if between > 0 {
 		end = between
 	} else {
-		end = yearDays - between
+		end = yearDays + between
 	}
 	//fmt.Println("Between: ", end)
 	tmpDays := int32(0)
@@ -157,7 +157,7 @@ func getLunarDateBySolar(year, month, day int32) (CaYearInfo, bool) {
 	between, _ := getDaysBetweenSolar(year, zengMonth, zengDay,
 		year, month, day)
 	if between == 0 { //正月初一
-		return CaYearInfo{year, 1, 1}, true
+		return CaYearInfo{year, 0, 1}, true
 	} else if between < 0 {
 		year -= 1
 	}
@@ -394,7 +394,7 @@ func solarToLunar(year, month, day int32) (caLunarDayInfo, bool) {
 	termList := v.(map[string]string)
 
 	//某月第一个节气开始日期
-	firstTerm, _ := getTermDate(year, month*2)
+	firstTerm, _ := getTermDate(year, month*2-1)
 	//干支所在年份
 	ganZhiYear := int32(0)
 	if month > 1 || (month == 1 && day >= term2.Day) {
@@ -411,11 +411,13 @@ func solarToLunar(year, month, day int32) (caLunarDayInfo, bool) {
 	}
 
 	lunarDate, _ := getLunarDateBySolar(year, month, day)
+	//fmt.Printf("SOLAR DATE: %v - %v - %v\n", year, month, day)
+	//fmt.Println("LUNAR DATE:", lunarDate)
 	lunarLeapMonth, _ := getLunarLeapYear(lunarDate.Year)
 	lunarMonthName := ""
-	if lunarLeapMonth > 0 && lunarLeapMonth+1 == lunarDate.Month {
-		lunarMonthName = "闰" + lunarData["monthCn"][lunarDate.Month-2] + "月"
-	} else if lunarLeapMonth > 0 && lunarLeapMonth >= lunarDate.Month {
+	if lunarLeapMonth > 0 && lunarLeapMonth == lunarDate.Month {
+		lunarMonthName = "闰" + lunarData["monthCn"][lunarDate.Month-1] + "月"
+	} else if lunarLeapMonth > 0 && lunarLeapMonth < lunarDate.Month {
 		lunarMonthName = lunarData["monthCn"][lunarDate.Month-1] + "月"
 	} else {
 		lunarMonthName = lunarData["monthCn"][lunarDate.Month] + "月"
@@ -428,14 +430,15 @@ func solarToLunar(year, month, day int32) (caLunarDayInfo, bool) {
 	//除夕
 	if int32(lunarDate.Month) == (lunarMonthLen-1) && lunarDate.Day == lunarMonthInfos[lunarMonthLen-1].days {
 		lunarFtv = lunarFestival["d0100"]
-	} else if lunarLeapMonth > 0 && lunarDate.Month > lunarLeapMonth {
-		lunarFtv = lunarFestival[formatDayD4(lunarDate.Month-1, lunarDate.Day)]
-	} else {
+	} else if lunarLeapMonth > 0 && lunarDate.Month >= lunarLeapMonth {
 		lunarFtv = lunarFestival[formatDayD4(lunarDate.Month, lunarDate.Day)]
+	} else {
+		lunarFtv = lunarFestival[formatDayD4(lunarDate.Month+1, lunarDate.Day)]
 	}
 
 	// 返回结果
 	resInfo := caLunarDayInfo{}
+
 	//fmt.Println("GanZhiYear: ", ganZhiYear)
 	zodiac, _ := getYearZodiac(ganZhiYear)
 	resInfo.Zodiac = zodiac
@@ -446,9 +449,6 @@ func solarToLunar(year, month, day int32) (caLunarDayInfo, bool) {
 	dayName, _ := getLunarDayName(year, month, day)
 	resInfo.GanZhiDay = dayName
 	resInfo.Term = termList[formatDayD4(month, day)]
-	resInfo.LunarYear = lunarDate.Year
-	resInfo.LunarMonth = lunarDate.Month
-	resInfo.LunarDay = lunarDate.Day
 	resInfo.LunarMonthName = lunarMonthName
 	resInfo.LunarDayName = lunarData["dateCn"][lunarDate.Day-1]
 	resInfo.LunarLeapMonth = lunarLeapMonth
